@@ -17,18 +17,31 @@
   word-wrap:break-word;
 }
 span{
-  margin: 2px;
+  padding: 0 4px;
+}
+.c-1{
+  color: red;
+}
+.c-2{
+  color: rgb(6, 121, 6);
+}
+.c-3{
+  color: rgb(226, 41, 246);
+}
+.c-4{
+  color: rgb(6, 37, 237);
 }
 
 button {
   border-radius: 8px;
-  border: 1px solid transparent;
+  border: 1px solid yellowgreen;
   padding: 0.6em 1.2em;
   font-size: 1em;
   font-weight: 500;
-  font-family: inherit;
   cursor: pointer;
   transition: border-color 0.25s;
+  background-color: bisque;
+  margin: 10px;
 }
 button:hover {
   border-color: #646cff;

@@ -27,18 +27,7 @@ interface Work {
   count: number;
   priority: Priority;
 }
-// const work: Work = { count: 100 };
 const workList: Work[] = [];
-const app = document.querySelector<HTMLDivElement>("#app");
-const btn = document.createElement("button");
-btn.innerHTML = "执行更新";
-app!.appendChild(btn);
-
-const insertItem = (content: number) => {
-  const span = document.createElement("span");
-  span.innerHTML = `${content}`;
-  app?.appendChild(span);
-};
 
 // 调度
 function scheduler() {
@@ -53,6 +42,7 @@ function scheduler() {
   // 策略逻辑
   if (!curWork) {
     // 没有任务，取消调度
+    curCallback = null;
     cbNode && cancelCallback(cbNode);
     return;
   }
@@ -63,16 +53,14 @@ function scheduler() {
   }
 
   // 已经到这里了  肯定是高优先级  所以下面的条件可以没有   直接执行  cbNode && cancelCallback(cbNode)
-  if (curPriority > prevPriority) {
-    // 优先级更高，打断
-    cbNode && cancelCallback(cbNode);
-  }
+  // 优先级更高，打断
+  cbNode && cancelCallback(cbNode);
   // 之前的逻辑  perform(curWork);
   curCallback = scheduleCallback(curPriority, perform.bind(null, curWork));
 }
 
 // 更新流程
-function perform(work: Work, didTimeout?: boolean) {
+function perform(work: Work, didTimeout?: boolean): any {
   // needSync 同步执行
   // didTimeout = true 当前任务已经过期，需要同步执行
   const needSync = work.priority === ImmediatePriority || didTimeout;
@@ -89,7 +77,8 @@ function perform(work: Work, didTimeout?: boolean) {
   if (!work.count) {
     // 当前 work 任务完成
     // 从 workList 中移除
-    workList.splice(workList.indexOf(work), 1);
+    const i = workList.indexOf(work);
+    workList.splice(i, 1);
     prevPriority = IdlePriority;
   }
 
@@ -97,7 +86,7 @@ function perform(work: Work, didTimeout?: boolean) {
   // 再次调度
   scheduler();
   const newCallback = curCallback;
-  if (newCallback && prevCallback === prevCallback) {
+  if (newCallback && prevCallback === newCallback) {
     /**
      * 同一个 work
      * 不用的再次进入 调度器
@@ -110,8 +99,40 @@ function perform(work: Work, didTimeout?: boolean) {
 }
 
 // 交互
-btn.onclick = () => {
-  const newWork: Work = { count: 100 };
-  workList.unshift(newWork);
-  scheduler();
+const priority2UseList: Priority[] = [
+  ImmediatePriority,
+  UserBlockingPriority,
+  NormalPriority,
+  LowPriority,
+];
+const priority2Name = [
+  "noop",
+  "ImmediatePriority",
+  "UserBlockingPriority",
+  "NormalPriority",
+  "LowPriority",
+  "IdlePriority",
+];
+const app = document.querySelector<HTMLDivElement>("#app");
+priority2UseList.forEach((priority) => {
+  const btn = document.createElement("button");
+  btn.innerHTML = `执行 ${priority2Name[priority]}`;
+  btn.onclick = () => {
+    const newWork: Work = { count: 100, priority };
+    workList.push(newWork);
+    scheduler();
+  };
+  app!.appendChild(btn);
+});
+
+const insertItem = (content: number) => {
+  const span = document.createElement("span");
+  span.innerHTML = `${content}`;
+  span.className = `c-${content}`;
+  let t = 10000000,
+    r = 0;
+  while (t--) {
+    r++;
+  }
+  app?.appendChild(span);
 };
